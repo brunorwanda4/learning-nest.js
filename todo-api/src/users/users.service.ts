@@ -1,26 +1,52 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-
+import { Prisma, UserRole } from '@prisma/client';
+import { DbService } from 'src/db/db.service';
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(private readonly db: DbService) { }
+
+  async create(createUserDto: Prisma.UserCreateInput) {
+    return this.db.user.create({
+      data: createUserDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(role?: UserRole) {
+    if (role) return this.db.user.findMany({
+      where: {
+        role: role,
+      },
+    });
+    return this.db.user.findMany({});
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    const user = await this.db.user.findUnique({
+      where: { id: id },
+    });
+
+    if (!user) throw new Error('User not found');
+    if (user.role === UserRole.ADMIN) throw new Error('User is an admin, cannot be found by id');
+    return user
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: Prisma.UserUpdateInput) {
+    const user = await this.findOne(id);
+    if (user.role === UserRole.ADMIN) throw new Error('User is an admin, cannot be updated');
+
+    const update_user =await this.db.user.update({
+      where: { id: id },
+      data: updateUserDto,
+    });
+    if (!update_user) throw new Error('User not found');
+    return update_user
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    const user = await this.db.user.delete({
+      where: { id: id }
+    });
+    if (!user) throw new Error('User not found');
+    return user
   }
 }
