@@ -6,9 +6,10 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post()
-  create(createUserDto: Prisma.UserCreateInput) {
+  create(@Body() createUserDto: Prisma.UserCreateInput) {
     return this.usersService.create(createUserDto);
   }
+  
 
   @Get()
   findAll(@Query('role') role?: UserRole) {
@@ -21,7 +22,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body(ValidationPipe) updateUserDto: Prisma.UserUpdateInput) {
+  update(@Param('id') id: string, @Body() updateUserDto: Prisma.UserUpdateInput) {
     return this.usersService.update(id, updateUserDto);
   }
 
