@@ -1,12 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ValidationPipe, UsePipes } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Prisma, UserRole } from '@prisma/client';
+import { ZodValidationPipe } from 'src/common/pipes/zod-validation.pipe';
+import { CreateUserDto, CreateUserSchema } from './dto/user.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post()
-  create(@Body() createUserDto: Prisma.UserCreateInput) {
+  create(@Body(new ZodValidationPipe(CreateUserSchema)) createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
   
