@@ -57,7 +57,7 @@ export class UsersService {
     try {
       const user = await this.findOne(id);
       if (user.role === UserRole.ADMIN) throw new NotFoundException('User is an admin, cannot be updated');
-      if(!!updateUserDto.email) {
+      if (!!updateUserDto.email) {
         const existingUser = await this.db.user.findUnique({
           where: { email: typeof updateUserDto.email === 'string' ? updateUserDto.email : undefined },
         });
